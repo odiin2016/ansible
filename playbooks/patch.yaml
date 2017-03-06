@@ -1,0 +1,35 @@
+---
+- hosts: all 
+  tasks:
+  - name: update dnf
+    dnf:
+      name: '*dnf*'
+      state: latest
+    when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
+
+  - name: update kernel
+    dnf:
+      name: '*kernel*'
+      state: latest
+    when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
+ 
+  - name: update all - arch
+    pacman:
+      update_cache: yes
+      upgrade: yes
+    register: result
+    when: ansible_distribution == "Archlinux"
+
+  - debug: var=result
+
+  - name: update all - rh
+    dnf:
+      name: '*'
+      state: latest
+    register: result
+    when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"
+  - debug: var=result
+
+  - name: dnf clean up to conserve space 
+    command: dnf clean all
+    when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"

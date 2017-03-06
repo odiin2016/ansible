@@ -1,0 +1,44 @@
+---
+- hosts: "{{ host }}"
+  become: yes
+  
+  vars_prompt:
+
+    - name: "host"
+      private: no
+      prompt: "Which hosts do you want to change packages on? List are space delimited. (Required, defaults to all.)" 
+      default: "all"
+
+    - name: "packs"
+      private: no
+      prompt: "What packages do you want change? Lists are comma delimited followed by a space. Defaults to none."
+      default: ""
+
+    - name: "state"
+      private: no
+      promp: "What is the desired state? Default is present. (absent, present, or latest)"
+      default: "present"
+
+  tasks:
+
+  - name: change package(s) - arch
+    pacman:
+      name: "{{ packs }}"
+      state: "{{ state }}"
+    register: result
+    when: ansible_distribution == "Archlinux"
+
+  - debug: var=result
+
+  - name: change package(s) - rh
+    yum:
+      name: "{{ packs }}"
+      state: "{{ state }}"
+    register: result
+    when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"
+
+  - debug: var=result
+
+  - name: yum clean - rh
+    command: yum clean all
+    when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"

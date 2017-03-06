@@ -1,0 +1,2 @@
+roles/*/vaults/*
+roles/*/vars/*

@@ -1,0 +1,170 @@
+---
+- hosts: all
+
+  pre_tasks:
+
+  - name:  install needed packages
+    yum:
+      name: "{{ item }}"
+      state: installed
+    with_items: [ 'epel-release', 'mlocate', 'aria2', 'rsync', 'screen', 'vim',  'yum-utils', 'fpaste', 'nfs-utils' ]
+    when: ansible_distribution == "Centos"
+    tags: [ "centos" ] 
+
+  - name: disable firewalld
+    systemd:
+      name: firewalld
+      enabled: no
+    when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"
+    tags: [ "fedora", "centos" ]
+
+  - name: create dnf plugin directory
+    file:
+      path: /var/lib/dnf/plugins/local
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+    when: ansible_distribution == "Fedora"
+    tags: [ "fedora" ]
+
+  - name: remove un-needed rpms
+    dnf:
+      name: "{{ item }}"
+      state: absent
+    with_items: [ 'transmission', 'pidgin', 'thunderbird' ]
+    when: ansible_distribution == "Fedora"
+    tags: [ "fedora" ]
+
+  - name: install required rpms
+    dnf:
+      name: "{{ item }}"
+      state: present
+    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'icedtea-web', 'epson-inkjet-printer-escpr', 'deepin-terminal', 'yum-utils', 'fpaste',  'nfs-utils', 'atom', 'nmon' ]
+    when: ansible_distribution == "Fedora"
+    tags: [ "fedora" ]
+
+  - name: create dnf plugin directory
+    file:
+      path: /var/lib/dnf/plugins/local
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+    when: ansible_distribution == "Fedora"
+    tags: [ "fedora" ]
+
+  - name: remove the things we don't need
+    pacman:
+      name: "{{ item }}"
+      state: absent
+    with_items: [ 'transmission', 'thunderbird', 'pidgin'  ]
+    when: ansible_distribution == "Archlinux"
+    tags: [ "arch" ]
+
+  - name: install the extra packages we like
+    pacman:
+      name: "{{ item }}"
+      state: present
+    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'gnome-disk-utility', 'deepin-terminal', 'lightdm', 'deepin-session-ui', 'cups', 'print-manager', 'system-config-printer', 'icedtea-web', 'openssh', 'hexchat', 'gist', 'gtk3-print-backends', 'nfs-utils', 'atom', 'nmon' ]
+    when: ansible_distribution == "Archlinux"
+    tags: [ "arch" ]
+ 
+  - name: copy contents of /opt/scripts
+    copy:
+      src: /opt/scripts
+      dest: /opt/
+      directory_mode: 0777
+      mode: 0755
+    tags: [ "all_systems" ]
+
+  - name: make nfs mountpoints
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0777
+      owner: root
+      group: root
+    with_items: [ '/srv/ansible', '/srv/software', ]
+    when: ansible_hostname != "centini"
+    tags: [ 'nfs_setup'  ]
+
+  - name: setup nfs mount for /srv/ansible
+    mount:
+       name: /srv/ansible
+       src: centini:/srv/ansible
+       fstype: nfs
+       opts: defaults
+       state: present
+    when: ansible_hostname != "centini"
+    tags: [ 'nfs_setup'  ]
+  
+  - name: set up nfs mount for /srv/software
+    mount: 
+      name: /srv/software
+      src: centini:/srv/software
+      fstype: nfs
+      opts: defaults
+      state: present
+    when: ansible_hostname != "centini"
+    tags: [ 'nfs_setup'  ]
+
+  - name: update all - arch 
+    pacman:
+      update_cache: yes
+      upgrade: yes
+    when: ansible_distribution == "Archlinux"
+    tags: [ "arch" ]
+
+  - name: update all -rh
+    yum: 
+      name:  "{{ item }}"
+      state: latest
+    with_items: [ '*' ]
+    when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora" 
+    tags: [ "centos", "fedora" ]
+  
+
+  roles:
+    - { role: deepin }
+    - { role: default_users }
+#    - { role: beats_client }
+
+  post_tasks:
+
+  handlers:
+  - name: ensure sshd are enabled and started
+    systemd:
+      name: sshd
+      state: started
+      enabled: yes
+    tags: [ "all_systems" ]
+
+  - name: start and enable cups
+    systemd:
+      name: org.cups.cupsd
+      state: started
+      enabled: yes
+    tags: [ "all_systems"  ]
+
+  - name: stop and disable iptables
+    systemd:
+      name: itables
+      state: stopped
+      enabled: no
+    when: ansible_distribution == "Archlinux"
+    tags: [ "arch" ]
+
+  - name: start and enable nfs client
+    systemd:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+      with_items: [ 'rpcbind', 'nfs-lock', 'nfsidmap'  ]
+    tags: [ 'nfs_setup'  ]
+
+  - name: enable gui
+    systemd:
+      name: lightdm
+      state: started
+      enabled: yes

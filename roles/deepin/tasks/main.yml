@@ -1,0 +1,14 @@
+---
+  - name:  install deepin - arch
+    pacman:
+      name: "{{ item }}"
+      state: latest
+    with_items: [ 'lightdm', 'deepin', 'deepin-session-ui', 'deepin-extra', 'pulseaudio', 'pulseaudio-alsa' ]
+    when: ansible_distribution == "Archlinux"
+
+  - name: install deepin - rh
+    yum:
+      name: "{{item  }}"
+      state: latest
+    with_items: [ 'lightdm', 'deepin', 'deepin-session-ui', 'deepin-extra', 'pulseaudio', 'pulseaudio-alsa' ]
+    when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"

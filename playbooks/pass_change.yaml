@@ -1,0 +1,27 @@
+---
+- hosts: "{{ hosts }}"
+  
+  vars_prompt:
+    - name: "hosts"
+      private: no
+      default: "all"
+      prompt: "Which hosts would you like to change a password on? Default is all."
+
+    - name: "user"
+      prompt: "Which user requires a password change?"
+      private: no
+
+    - name: "pass"
+      prompt: "Enter the new password. This is will not be echoed to the screen and will be sha512 encrypted. No default."
+      private: yes
+      encrypt: "sha512_crypt"
+      confirm: yes
+
+  tasks:
+
+  - name: change password
+    user:
+      name: "{{ user }}"
+      password: "{{ pass }}"
+      update_password: always
+    when: pass != "" 

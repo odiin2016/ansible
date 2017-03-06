@@ -1,0 +1,13 @@
+---
+# tasks file for default_users
+- include_vars: vars/users.yml
+
+- name: create users
+  user:
+    name: "{{ item.name}}"
+    comment: "{{ item.gecos }}"
+    password: "{{ item.pass }}"
+    update_password: on_create
+    state: present
+  with_items: "{{ users }}"
+  no_log: true

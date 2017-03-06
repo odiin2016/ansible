@@ -1,0 +1,11 @@
+---
+- hosts: "{{ hosts }}"
+
+  vars_prompt:
+    - name: "hosts"
+      prompt: "Which host(s) would you like to add users to? Lists are space delimited and the default is all"
+      private: no
+      default: "all"
+
+  roles:
+    - default_users

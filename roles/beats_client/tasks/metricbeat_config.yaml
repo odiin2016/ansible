@@ -1,0 +1,80 @@
+---
+- name: make beats cert directory
+  file:
+    path: /etc/pki/tls/certs
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: copy beats cert
+  copy:
+    src: /etc/pki/tls/certs/logstash-forwarder.crt
+    dest: /etc/pki/tls/certs/
+    mode: 0644
+    owner: root
+    group: root
+  
+- name: import/validate elastic gpg key
+  rpm_key:
+    key: http://packages.elastic.co/GPG-KEY-elasticsearch
+    state: present
+    validate_certs: yes
+  when: ( ansible_distribution == "Fedora" or ansible_distribution == "CentOS" ) and ( ansible_distribution != "Archlinux" )
+  
+- name: copy elastic repo file
+  copy:
+    src: /etc/yum.repos.d/elasticsearch5.repo
+    dest: /etc/yum.repos.d
+    mode: 0644
+    owner: root
+    group: root
+  when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
+  
+- name: install topbeat 
+  dnf:
+    name: "{{ item }}"
+    state: present
+  with_items: [ 'metricbeat' ]
+  when: ansible_distribution == "Fedora"
+   
+- name: install topbeat
+  pacman: 
+    name: "{{ item }}"
+    state: present
+  with_items: [ 'metricbeat' ]
+  when: ansible_distribution == "Archlinux"
+
+- name: copy over filebeat config
+  copy:
+    src: /etc/metricbeat/metricbeat.yml
+    dest: /etc/metricbeat/
+    mode: 0644
+    owner: root
+    group: root
+    
+- name: start and enable metricbeat
+  systemd:
+    name: metricbeat
+    enabled: yes
+    state: restarted
+
+- name: stop and disable topbeat
+  systemd:
+    name: topbeat
+    enabled: no
+    state: stopped
+
+- name: remove topbeat - rh
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items: [ 'topbeat' ]
+  when:  ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
+
+- name: remove topbeat - arch
+  pacman:
+    name: "{{ item }}"
+    state: absent
+  with_items: [ 'topbeat' ]
+  when: ansible_distribution == "Archlinux"

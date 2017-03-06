@@ -1,0 +1,61 @@
+---
+- name: make filebeat cert directory
+  file:
+    path: /etc/pki/tls/certs
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: copy filebeat cert
+  copy:
+    src: /etc/pki/tls/certs/logstash-forwarder.crt
+    dest: /etc/pki/tls/certs/
+    mode: 0644
+    owner: root
+    group: root
+
+- name: import/validate filebeat gpg key
+  rpm_key:
+    key: http://packages.elastic.co/GPG-KEY-elasticsearch
+    state: present
+    validate_certs: yes
+  when: ( ansible_distribution == "CentOS" or ansible_distribution == "Fedora" ) and ( ansibile_distribution != "Archlinux" )
+
+- name: copy filebeat repo file
+  copy:
+    src: /etc/yum.repos.d/elastic-beats.repo
+    dest: /etc/yum.repos.d
+    mode: 0644
+    owner: root
+    group: root
+  when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"
+
+- name: install filebeat
+  dnf:
+    name: "{{ item }}"
+    state: present
+  with_items: [ 'filebeat' ]
+  when: ansible_distribution == "Fedora"
+
+- name: install filebeat
+  pacman:
+    name: "{{ item }}"
+    state: present
+  with_items: [ 'filebeat' ]
+  when: ansible_distribution == "Archlinux"
+
+- name: copy over filebeat config
+  copy:
+    src: /etc/filebeat/filebeat.yml
+    dest: /etc/filebeat/
+    mode: 0644
+    owner: root
+    group: root
+
+
+- name: start and enable filebeat
+  systemd:
+    name: filebeat
+    enabled: yes
+    state: restarted

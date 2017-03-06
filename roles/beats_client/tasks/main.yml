@@ -1,0 +1,5 @@
+---
+- include: filebeat_config.yaml
+- include: packetbeat_config.yaml
+- include: metricbeat_config.yaml
+
