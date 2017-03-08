@@ -1,14 +1,14 @@
 ---
 - hosts: all 
   tasks:
-  - name: update dnf
-    dnf:
-      name: '*dnf*'
+  - name: update yum
+    yum:
+      name: '*yum*'
       state: latest
     when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
 
   - name: update kernel
-    dnf:
+    yum:
       name: '*kernel*'
       state: latest
     when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
@@ -23,13 +23,13 @@
   - debug: var=result
 
   - name: update all - rh
-    dnf:
+    yum:
       name: '*'
       state: latest
     register: result
     when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"
   - debug: var=result
 
-  - name: dnf clean up to conserve space 
-    command: dnf clean all
+  - name: yum clean up to conserve space 
+    command: yum clean all
     when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
