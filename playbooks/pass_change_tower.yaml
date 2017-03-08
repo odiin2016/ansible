@@ -1,0 +1,11 @@
+---
+- hosts: "{{ hosts }}"
+  
+  tasks:
+
+  - name: change password
+    user:
+      name: "{{ user }}"
+      password: "{{ pass }}"
+      update_password: always
+    when: pass != "" 
