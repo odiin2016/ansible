@@ -4,10 +4,10 @@
   pre_tasks:
 
   - name:  install needed packages
-    yum:
+    dnf:
       name: "{{ item }}"
       state: installed
-    with_items: [ 'epel-release', 'mlocate', 'aria2', 'rsync', 'screen', 'vim',  'yum-utils', 'fpaste', 'nfs-utils' ]
+    with_items: [ 'epel-release', 'mlocate', 'aria2', 'rsync', 'screen', 'vim',  'dnf-utils', 'fpaste', 'nfs-utils' ]
     when: ansible_distribution == "Centos"
     tags: [ "centos" ] 
 
@@ -40,7 +40,7 @@
     dnf:
       name: "{{ item }}"
       state: present
-    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'icedtea-web', 'epson-inkjet-printer-escpr', 'deepin-terminal', 'yum-utils', 'fpaste',  'nfs-utils', 'atom', 'nmon' ]
+    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'icedtea-web', 'epson-inkjet-printer-escpr', 'fpaste',  'nfs-utils', 'nmon' ]
     when: ansible_distribution == "Fedora"
     tags: [ "fedora" ]
 
@@ -117,7 +117,7 @@
     tags: [ "arch" ]
 
   - name: update all -rh
-    yum: 
+    dnf: 
       name:  "{{ item }}"
       state: latest
     with_items: [ '*' ]
@@ -126,7 +126,7 @@
   
 
   roles:
-    - { role: deepin }
+#    - { role: deepin }
     - { role: default_users }
 #    - { role: beats_client }
 
@@ -168,3 +168,25 @@
       name: lightdm
       state: started
       enabled: yes
+
+  - name: add ansible nfs share
+    mount:
+      state: present
+      src: centini:/home/nfs/share/ansible
+      path: /mnt/ansible
+      fstype: nfs
+      opts: defaults
+      boot: no
+      dump: 0
+      passno: 0
+
+  - name: add software nfs share
+    mount:
+      state: present
+      src: centini:home/nfs/share/software
+      path: /mnt/software
+      fstype: nfs
+      opts: defaults
+      boot: no
+      dump: 0
+      passno: 0

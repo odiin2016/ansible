@@ -5,13 +5,28 @@
     yum:
       name: '*yum*'
       state: latest
-    when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
+    when:  ansible_distribution == "CentOS"
 
   - name: update kernel
     yum:
       name: '*kernel*'
       state: latest
-    when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
+    when:  ansible_distribution == "CentOS"
+
+ hosts: all
+  tasks:
+  - name: update dnf
+    dnf:
+      name: '*dnf*'
+      state: latest
+    when: ansible_distribution == "Fedora"
+
+  - name: update kernel
+    dnf:
+      name: '*kernel*'
+      state: latest
+    when: ansible_distribution == "Fedora"
+
  
   - name: update all - arch
     pacman:
@@ -27,9 +42,20 @@
       name: '*'
       state: latest
     register: result
-    when: ansible_distribution == "CentOS" or ansible_distribution == "Fedora"
-  - debug: var=result
+    when:  ansible_distribution == "Centos"
 
   - name: yum clean up to conserve space 
     command: yum clean all
-    when: ansible_distribution == "Fedora" or ansible_distribution == "CentOS"
+    when: ansible_distribution == "CentOS"
+
+ name: update all - Fedora
+    dnf:
+      name: '*'
+      state: latest
+    register: result
+    when: ansible_distribution == "Fedora"
+
+  - name: dnf clean up to conserve space
+    command: dnf clean all
+    when: ansible_distribution == "Fedora"
+
