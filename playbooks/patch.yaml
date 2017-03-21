@@ -43,7 +43,7 @@
 
   - name: dnf clean all -dnf rh
     command: "dnf clean all"
-    when: anisble_distribution == "Fedora"
+    when: ansible_distribution == "Fedora"
 
   - name: update all - arch
     pacman:
