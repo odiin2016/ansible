@@ -38,7 +38,7 @@
     when:  ansible_distribution == "Centos"
 
   - name: yum clean up to conserve space 
-    command: yum clean all
+    command: "yum clean all"
     when: ansible_distribution == "CentOS"
 
     name: update all - Fedora
@@ -48,6 +48,6 @@
     when: ansible_distribution == "Fedora"
 
   - name: dnf clean up to conserve space
-    command: dnf clean all
+    command: "dnf clean all"
     when: ansible_distribution == "Fedora"
 
