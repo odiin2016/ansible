@@ -37,7 +37,7 @@
       state: latest
     when:  ansible_distribution == "Centos"
 
-  - name: yum clean up to conserve space 
+  - name: yum clean up - cent
     command: "yum clean all"
     when: ansible_distribution == "CentOS"
 
