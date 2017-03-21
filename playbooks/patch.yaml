@@ -13,6 +13,16 @@
       state: latest
     when:  ansible_distribution == "CentOS"
 
+  - name: update all - rh
+    yum:
+      name: '*'
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: yum clean all - rh yum
+    command: "yum clean all"
+    when: ansible_distribution == "CentOS"
+
   - name: update dnf
     dnf:
       name: '*dnf*'
@@ -25,25 +35,18 @@
       state: latest
     when: ansible_distribution == "Fedora"
  
-  - name: update all - arch
-    pacman:
-      update_cache: yes
-      upgrade: yes
-    when: ansible_distribution == "Archlinux"
-
-  - name: update all - rh
-    yum:
-      name: '*'
-      state: latest
-    when:  ansible_distribution == "Centos"
-
-    name: update all - Fedora
+  - name: update all - fedora
     dnf:
       name: '*'
       state: latest
     when: ansible_distribution == "Fedora"
 
-  - name: dnf clean up to conserve space
+  - name: dnf clean all -dnf rh
     command: "dnf clean all"
-    when: ansible_distribution == "Fedora"
+    when: anisble_distribution == "Fedora"
 
+  - name: update all - arch
+    pacman:
+      update_cache: yes
+      upgrade: yes
+    when: ansible_distribution == "Archlinux"
