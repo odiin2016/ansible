@@ -7,7 +7,7 @@
     dnf:
       name: "{{ item }}"
       state: installed
-    with_items: [ 'epel-release', 'mlocate', 'aria2', 'rsync', 'screen', 'vim',  'dnf-utils', 'fpaste', 'nfs-utils' ]
+    with_items: [ 'epel-release', 'mlocate', 'aria2', 'rsync', 'screen', 'vim',  'dnf-utils', 'fpaste', 'nfs-utils', 'nano' ]
     when: ansible_distribution == "Centos"
     tags: [ "centos" ] 
 
@@ -40,7 +40,7 @@
     dnf:
       name: "{{ item }}"
       state: present
-    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'icedtea-web', 'epson-inkjet-printer-escpr', 'fpaste',  'nfs-utils', 'nmon' ]
+    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'icedtea-web', 'epson-inkjet-printer-escpr', 'fpaste',  'nfs-utils', 'nmon', 'nano' ]
     when: ansible_distribution == "Fedora"
     tags: [ "fedora" ]
 
@@ -66,7 +66,7 @@
     pacman:
       name: "{{ item }}"
       state: present
-    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'gnome-disk-utility', 'deepin-terminal', 'lightdm', 'deepin-session-ui', 'cups', 'print-manager', 'system-config-printer', 'icedtea-web', 'openssh', 'hexchat', 'gist', 'gtk3-print-backends', 'nfs-utils', 'atom', 'nmon' ]
+    with_items: [ 'geary', 'mlocate', 'aria2', 'rsync', 'screen', 'vim', 'gnome-disk-utility', 'deepin-terminal', 'lightdm', 'deepin-session-ui', 'cups', 'print-manager', 'system-config-printer', 'icedtea-web', 'openssh', 'hexchat', 'gist', 'gtk3-print-backends', 'nfs-utils', 'atom', 'nmon', 'nano' ]
     when: ansible_distribution == "Archlinux"
     tags: [ "arch" ]
  
@@ -85,27 +85,33 @@
       mode: 0777
       owner: root
       group: root
-    with_items: [ '/srv/ansible', '/srv/software', ]
+    with_items: [ '/mnt/ansible', '/mnt/software', ]
     when: ansible_hostname != "centini"
     tags: [ 'nfs_setup'  ]
 
   - name: setup nfs mount for /srv/ansible
     mount:
-       name: /srv/ansible
-       src: centini:/srv/ansible
+       name: /mnt/ansible
+       src: centini:/home/nfs/share/ansible
        fstype: nfs
        opts: defaults
        state: present
+       passno: 0
+       dump: 0
+       boot: no
     when: ansible_hostname != "centini"
     tags: [ 'nfs_setup'  ]
   
   - name: set up nfs mount for /srv/software
     mount: 
-      name: /srv/software
-      src: centini:/srv/software
+      name: /mnt/software
+      src: centini:/home/nfs/share/software
       fstype: nfs
       opts: defaults
       state: present
+      passno: 0
+      dump: 0
+      boot: no
     when: ansible_hostname != "centini"
     tags: [ 'nfs_setup'  ]
 
@@ -167,26 +173,3 @@
     systemd:
       name: lightdm
       state: started
-      enabled: yes
-
-  - name: add ansible nfs share
-    mount:
-      state: present
-      src: centini:/home/nfs/share/ansible
-      path: /mnt/ansible
-      fstype: nfs
-      opts: defaults
-      boot: no
-      dump: 0
-      passno: 0
-
-  - name: add software nfs share
-    mount:
-      state: present
-      src: centini:home/nfs/share/software
-      path: /mnt/software
-      fstype: nfs
-      opts: defaults
-      boot: no
-      dump: 0
-      passno: 0
