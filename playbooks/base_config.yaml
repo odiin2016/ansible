@@ -89,7 +89,7 @@
     when: ansible_hostname != "centini"
     tags: [ 'nfs_setup'  ]
 
-  - name: setup nfs mount for /srv/ansible
+  - name: setup nfs mount for /mnt/ansible
     mount:
        name: /mnt/ansible
        src: centini:/home/nfs/share/ansible
@@ -132,7 +132,7 @@
   
 
   roles:
-#    - { role: deepin }
+    - { role: deepin }
     - { role: default_users }
 #    - { role: beats_client }
 

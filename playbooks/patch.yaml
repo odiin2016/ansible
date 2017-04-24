@@ -1,6 +1,15 @@
 ---
 - hosts: all 
   tasks:
+  - name: update /opt/scripts
+    copy:
+      src: /opt/scripts/
+      dest: /opt/scripts/
+      follow: yes
+      owner: root
+      group: wheel
+      mode: 0774
+
   - name: update yum
     yum:
       name: '*yum*'
